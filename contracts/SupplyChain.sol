@@ -16,7 +16,7 @@ contract SupplyChain {
   /* Add a line that creates a public mapping that maps the SKU (a number) to an Item.
      Call this mappings items
   */
-  mapping (uint => bytes32) public items;
+  mapping (uint => bytes32) public Items;
   /* Add a line that creates an enum called State. This should have 4 states
     ForSale
     Sold
@@ -50,11 +50,10 @@ contract SupplyChain {
 
     event LogShipped(uint sku);
 
-    event LogReceived(uint sku); 
+    event LogReceived(uint sku);
 
 
 /* Create a modifer that checks if the msg.sender is the owner of the contract */
-
   modifier verifyCaller (address _address) { require (msg.sender == _address); _;}
 
   modifier paidEnough(uint _price) { require(msg.value >= _price); _;}
@@ -73,13 +72,15 @@ contract SupplyChain {
    so checking that Item.State == ForSale is not sufficient to check that an Item is for sale.
    Hint: What item properties will be non-zero when an Item has been added?
    */
-  modifier forSale
-  modifier sold
-  modifier shipped
-  modifier received
+  modifier forSale (uint sku) { require (Items[0].State == ForSale)}
+  modifier sold (uint sku) { require (Items[1].State == sold)}
+  modifier shipped (uint sku) { require (Items[2].State == shipped)}
+  modifier received (uint sku) { require (Items[3].State == recieved)}
 
 
   constructor() public {
+    owner = msg.sender;
+    skuCount = 0;
     /* Here, set the owner as the person who instantiated the contract
        and set your skuCount to 0. */
   }
@@ -97,9 +98,16 @@ contract SupplyChain {
     if the buyer paid enough, and check the value after the function is called to make sure the buyer is
     refunded any excess ether sent. Remember to call the event associated with this function!*/
 
-  function buyItem(uint sku)
-    public
-  {}
+  function buyItem(uint sku) sold paidEnough checkValue
+    public payable
+  {
+    //Not sure how to define the seller
+    address buyer = msg.sender;
+    buyer.transfer(msg.value);
+    //not sure if this is right either
+    Item[1] = sold;
+    emit LogSold(sku);
+  }
 
   /* Add 2 modifiers to check if the item is sold already, and that the person calling this function
   is the seller. Change the state of the item to shipped. Remember to call the event associated with this function!*/
