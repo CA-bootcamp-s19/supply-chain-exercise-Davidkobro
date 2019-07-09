@@ -10,13 +10,15 @@ contract SupplyChain {
 
   /* set owner */
   address owner;
+  //seller
+  //address payable public buyer;
 
   /* Add a variable called skuCount to track the most recent sku # */
-  uint skuCount
+  uint skuCount;
   /* Add a line that creates a public mapping that maps the SKU (a number) to an Item.
      Call this mappings items
   */
-  mapping (uint => bytes32) public Items;
+  mapping(uint => bytes32) public items;
   /* Add a line that creates an enum called State. This should have 4 states
     ForSale
     Sold
@@ -33,12 +35,12 @@ contract SupplyChain {
     Be sure to add "payable" to addresses that will be handling value transfer
   */
   struct Item {
-    bytes32 name,
+    bytes32 name;
     uint sku;
-    uint price,
+    uint price;
     State state;
-    address seller;
-    address buyer;
+    address payable seller;
+    address payable buyer;
   }
 
   /* Create 4 events with the same name as each possible State (see above)
@@ -72,10 +74,12 @@ contract SupplyChain {
    so checking that Item.State == ForSale is not sufficient to check that an Item is for sale.
    Hint: What item properties will be non-zero when an Item has been added?
    */
-  modifier forSale (uint sku) { require (Items[0].State == ForSale)}
-  modifier sold (uint sku) { require (Items[1].State == sold)}
-  modifier shipped (uint sku) { require (Items[2].State == shipped)}
-  modifier received (uint sku) { require (Items[3].State == recieved)}
+
+   //EDIT
+  modifier forSale (uint sku) { require (Item.State == ForSale); _;}
+  modifier sold (uint sku) { require (items.State == Sold); _;}
+  modifier shipped (uint sku) { require (items.State == Shipped); _;}
+  modifier received (uint sku) { require (items[3].State == Recieved); _;}
 
 
   constructor() public {
@@ -101,25 +105,32 @@ contract SupplyChain {
   function buyItem(uint sku) sold paidEnough checkValue
     public payable
   {
-    //Not sure how to define the seller
-    address buyer = msg.sender;
+    //Not sure how to define the seller (does .transfer work?)
+    buyer = msg.sender;
     buyer.transfer(msg.value);
     //not sure if this is right either
-    Item[1] = sold;
+    items[1] = sold;
+    //Item[sku].state = sold;
     emit LogSold(sku);
   }
 
   /* Add 2 modifiers to check if the item is sold already, and that the person calling this function
   is the seller. Change the state of the item to shipped. Remember to call the event associated with this function!*/
-  function shipItem(uint sku)
+  function shipItem(uint sku) sold verifyCaller
     public
-  {}
+  {
+    items[2].state = shipped;
+    emit LogShipped(sku);
+  }
 
   /* Add 2 modifiers to check if the item is shipped already, and that the person calling this function
   is the buyer. Change the state of the item to received. Remember to call the event associated with this function!*/
-  function receiveItem(uint sku)
+  function receiveItem(uint sku) shipped verifyCaller
     public
-  {}
+  {
+    items[3].state = received;
+    emit LogReceived(sku);
+  }
 
   /* We have these functions completed so we can run tests, just ignore it :) */
   function fetchItem(uint _sku) public view returns (string memory name, uint sku, uint price, uint state, address seller, address buyer) {
@@ -133,3 +144,7 @@ contract SupplyChain {
   }
 
 }
+
+
+//questions: declare a seller on top for Buy items
+//
