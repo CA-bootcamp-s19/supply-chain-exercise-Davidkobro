@@ -76,8 +76,8 @@ contract SupplyChain {
    */
 
    //EDIT
-  modifier forSale (uint sku) { require (Item.State == ForSale); _;}
-  modifier sold (uint sku) { require (items.State == Sold); _;}
+  modifier forSale (uint sku) { require (Item.State.ForSale == ForSale); _;}
+  modifier sold (uint sku) { require (items.State[1] == Sold); _;}
   modifier shipped (uint sku) { require (items.State == Shipped); _;}
   modifier received (uint sku) { require (items[3].State == Recieved); _;}
 
@@ -147,4 +147,4 @@ contract SupplyChain {
 
 
 //questions: declare a seller on top for Buy items
-//
+//How to change state with enums
